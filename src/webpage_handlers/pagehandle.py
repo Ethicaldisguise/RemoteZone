@@ -10,6 +10,7 @@ from src.avails.events import StreamDataEvent
 from src.avails.exceptions import UnknownConnectionType, WebSocketRegistryReStarted
 from src.avails.useables import wrap_with_tryexcept
 from src.core import Dock
+from src.transfers import HEADERS
 from src.webpage_handlers import logger
 
 if TYPE_CHECKING:
@@ -219,3 +220,10 @@ def MessageHandler():
         WebSocketRegistry.send_data(d, const.DATA)
 
     return handler
+
+
+def register_handler_to_acceptor(acceptor_disp):
+    return acceptor_disp.register_handler(
+        HEADERS.CMD_TEXT,
+        MessageHandler()
+    )
