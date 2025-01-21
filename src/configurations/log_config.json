@@ -53,6 +53,9 @@
     },
     "rpcudp" : {
       "level": "INFO"
+    },
+    "asyncio" : {
+      "level": "INFO"
     }
   }
 }
