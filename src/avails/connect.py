@@ -62,7 +62,7 @@ class Socket(_socket.socket):
     def arecv(self, bufsize):
         return self.__loop.sock_recv(self, bufsize)
 
-    async def aconnect(self, __address) -> Self:
+    async def aconnect(self, __address):
         return await self.__loop.sock_connect(self, __address)
 
     async def asendall(self, data):
@@ -183,11 +183,7 @@ class TCPProtocol(NetworkProtocol):
             _logger.error(f"something wrong with the given address: {address}", exc_info=tpe)
             raise
         sock = cls.create_async_sock(loop, addr_family)
-
-        if timeout:
-            return await _asyncio.wait_for(sock.aconnect(address), timeout)
-
-        await sock.aconnect(address)
+        await (_asyncio.wait_for(sock.aconnect(address), timeout) if timeout else sock.aconnect(address))
         return sock
 
     def __repr__(self):
