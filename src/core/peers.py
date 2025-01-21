@@ -394,4 +394,5 @@ async def check_and_remove(peer: RemotePeer):
 
 
 def remove_peer(peer):
+    _logger.warning(f"a request for removal of {peer}")
     asyncio.create_task(check_and_remove(peer))
