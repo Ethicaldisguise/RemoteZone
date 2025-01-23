@@ -52,6 +52,7 @@ def initiate_bootup():
         const.IP_VERSION = socket.AF_INET6
 
     const.THIS_IP = str(ip_addr)
+    const.THIS_IP = "172.16.210.0"
     # const.WEBSOCKET_BIND_IP = const.THIS_IP
     _logger.info(f"{const.THIS_IP=}")
     validate_ports(const.THIS_IP)

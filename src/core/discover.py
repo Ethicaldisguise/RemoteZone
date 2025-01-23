@@ -89,7 +89,7 @@ async def send_discovery_requests(transport, broad_cast_addr, multicast_addr):
         _logger.info(f"entering passive mode for discovery after waiting for {const.DISCOVER_TIMEOUT}s")
         async for _ in use.async_timeouts(initial=0.1, max_retries=-1, max_value=const.DISCOVER_TIMEOUT):
             if Dock.kademlia_network_server.is_bootstrapped:
-                # _logger.info(f"{Dock.kademlia_network_server.is_bootstrapped=}")
+                _logger.info(f"{Dock.kademlia_network_server.is_bootstrapped=}")
                 continue
             if Dock.finalizing.is_set():
                 return
@@ -99,11 +99,7 @@ async def send_discovery_requests(transport, broad_cast_addr, multicast_addr):
     await send_discovery_packet()
 
     await asyncio.sleep(const.DISCOVER_TIMEOUT)  # wait a bit
-    # check once more, if not yet bootstrapped then we need to stay in passive mode
-    # and keep sending discovery requests
-
-    if Dock.kademlia_network_server.is_bootstrapped:
-        return
+    # stay in passive mode and keep sending discovery requests
 
     task = asyncio.create_task(enter_passive_mode())
 

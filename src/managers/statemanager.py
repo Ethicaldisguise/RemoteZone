@@ -5,11 +5,32 @@ import math
 import threading
 from asyncio import Queue as _queue
 from concurrent.futures import ThreadPoolExecutor as _ThreadPoolExecutor
-from typing import Iterable
-from typing import Optional
+from typing import Iterable, Optional
 
 from src.avails import useables
 from src.avails.useables import echo_print
+
+
+def _get_func_name(func):
+    """Retrieve the name of a function or callable in a robust way."""
+    # Handle partial functions
+    if isinstance(func, functools.partial):
+        return func.func.__name__
+
+    # Handle bound and unbound methods
+    if inspect.ismethod(func):
+        return func.__func__.__name__
+
+    # Handle regular functions and callables
+    if hasattr(func, "__name__"):
+        return func.__name__
+
+    # Fallback to frame inspection if no name is found
+    if frame := inspect.currentframe():
+        return frame.f_code.co_name
+
+    # Default name if everything else fails
+    return "not defined"
 
 
 class State:
@@ -32,17 +53,8 @@ class State:
         else:
             self.func = func
 
-        if inspect.ismethod(func):
-            self.func.__func__.__name__ = func.__name__
-        else:
-            if hasattr(func, __name__):
-                self.func.__name__ = func.__name__
-            else:
-                if fr := inspect.currentframe():
-                    self.func.__name__ = fr.f_code.co_name
-                else:
-                    self.func.__name__ = "not defined"
-        # self.func_name = func.__name__
+        self.func_name = _get_func_name(func)
+
         self.actuator = controller
         self.event = event_to_wait
 
@@ -50,7 +62,7 @@ class State:
         loop = asyncio.get_event_loop()
         x = loop.time()
         echo_print(f"[{x - math.floor(x):.5f}s] CORO:{self.is_coro} entering state :", self.name, end=' ')
-        print("func:", self.func.__name__)
+        print("func:", self.func_name)
 
         if self.event:
             await self.event.wait()

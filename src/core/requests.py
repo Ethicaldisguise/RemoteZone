@@ -11,6 +11,7 @@ from src.avails.events import RequestEvent
 from src.avails.mixins import QueueMixIn, ReplyRegistryMixIn
 from src.core import DISPATCHS, Dock, _kademlia, discover, gossip
 from src.core.discover import DiscoveryReplyHandler, DiscoveryRequestHandler
+from src.managers.statemanager import State
 from src.transfers import DISCOVERY, REQUESTS_HEADERS
 from src.transfers.transports import RequestsTransport
 
@@ -44,13 +45,30 @@ async def initiate():
     Dock.requests_endpoint = transport
     Dock.kademlia_network_server = kad_server
 
-    await discovery_initiate(
-        broad_cast_address,
-        kad_server,
-        multicast_address,
-        req_dispatcher,
-        transport
+    discovery_state = State(
+        "discovery",
+        functools.partial(
+            discovery_initiate,
+            broad_cast_address,
+            kad_server,
+            multicast_address,
+            req_dispatcher,
+            transport
+        ),
+        is_blocking=True,
     )
+
+    add_to_lists = State(
+        "adding this peer to lists",
+        kad_server.add_this_peer_to_lists,
+        is_blocking=True,
+    )
+
+    await Dock.state_manager_handle.put_state(discovery_state)
+    await Dock.state_manager_handle.put_state(add_to_lists)
+    # :todo: introduce context manager support into statemanager.State itself which reduces boilerplate
+
+    Dock.exit_stack.push_async_exit(kad_server)
 
     # await kad_server.add_this_peer_to_lists()
 

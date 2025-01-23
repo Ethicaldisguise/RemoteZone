@@ -16,6 +16,8 @@ from src.transfers._fileobject import FileItem, TransferState, recv_file_content
 
 _logger = logging.getLogger(__name__)
 
+# :todo: move all the status mixin mechanisms to manager level API,
+
 
 class Sender(StatusMixIn):
     version = const.VERSIONS['FO']
