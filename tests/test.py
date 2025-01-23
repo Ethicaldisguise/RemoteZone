@@ -72,16 +72,14 @@ def profile_getter():
 
 
 def mock_profile():
-    # const.MULTICAST_IP_v4 = '172.16.196.238'
-    # const.PORT_NETWORK = 4000
-    # requests._create_listen_socket = _create_listen_socket_mock
-    # const.THIS_IP = '172.16.196.238'
-
     src.managers.profilemanager._current_profile = profile_getter()
 
 
 def mock_multicast():
     const.MULTICAST_IP_v4 = "172.16.210.0"
+    # const.MULTICAST_IP_v4 = '172.16.196.238'
+    const.PORT_NETWORK = 4000
+    requests._create_listen_socket = _create_listen_socket_mock
 
 
 def test_initial_states():
