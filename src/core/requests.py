@@ -29,7 +29,7 @@ async def initiate():
     broad_cast_address = (const.BROADCAST_IP, const.PORT_NETWORK)
 
     req_dispatcher = RequestsDispatcher(None, Dock.finalizing.is_set)
-    transport = await setup_transport(bind_address, multicast_address, req_dispatcher)
+    transport = await setup_endpoint(bind_address, multicast_address, req_dispatcher)
     req_dispatcher.transport = RequestsTransport(transport)
 
     kad_server = _kademlia.prepare_kad_server(transport)
@@ -55,10 +55,10 @@ async def initiate():
     # await kad_server.add_this_peer_to_lists()
 
 
-async def setup_transport(bind_address, multicast_address, req_dispatcher):
+async def setup_endpoint(bind_address, multicast_address, req_dispatcher):
     loop = asyncio.get_running_loop()
     base_socket = _create_listen_socket(bind_address, multicast_address)
-    transport, proto = await loop.create_datagram_endpoint(
+    transport, _ = await loop.create_datagram_endpoint(
         functools.partial(RequestsEndPoint, req_dispatcher),
         sock=base_socket
     )
@@ -130,9 +130,11 @@ class RequestsDispatcher(QueueMixIn, ReplyRegistryMixIn, BaseDispatcher):
         # 2. Dispatcher objects that are not coupled with QueueMixIn (async)
         # 3. any type of handlers (async)
 
-        f = handler(req_event)
-        if inspect.isawaitable(f):
-            await f
+        try:
+            await f if inspect.isawaitable(f := handler(req_event)) else None
+        except Exception as e:
+            # we can't afford exceptions here as they move into QueueMixIn
+            _logger.info(f"{handler}({req_event}) failed with \n", exc_info=e)
 
 
 class RequestsEndPoint(asyncio.DatagramProtocol):

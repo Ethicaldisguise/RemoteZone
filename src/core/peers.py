@@ -374,15 +374,15 @@ async def check_and_remove(peer: RemotePeer):
         msg_id=use.get_unique_id(str)
     )
     fut = req_dispatcher.register_reply(ping_data.id)  # noqa
-    _logger.debug(f"connectivity check initiating for {peer}")
+    _logger.info(f"connectivity check initiating for {peer}")
     try:
         await asyncio.wait_for(fut, const.PING_TIMEOUT)
     except TimeoutError:
         # try a tcp connection if network is terrible with UDP
         try:
-            with await connect.connect_to_peer(peer):
+            with await connect.connect_to_peer(peer, timeout=const.PING_TIMEOUT):
                 pass
-        except (OSError, TimeoutError):
+        except OSError:
             # okay this one is cooked
             Dock.peer_list.remove_peer(peer.peer_id)
             data = DataWeaver(

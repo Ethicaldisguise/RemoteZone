@@ -96,7 +96,8 @@ def get_timeouts(initial=0.001, factor=2, max_retries=const.MAX_RETIRES, max_val
 
     if max_retries == -1:
         while True:
-            yield min(current, max_value)
+            if current >= max_value:
+                yield max_value
             current *= factor
 
     for _ in range(max_retries):

@@ -181,6 +181,7 @@ class PeerServer(network.Server):
         r = await super().bootstrap(addrs)
         if any(r):
             self.add_this_peer_task = asyncio.create_task(self.add_this_peer_to_lists())
+        print('looks like bootstrapping failed 😂😂')
         return r
 
     @override
@@ -301,21 +302,15 @@ class PeerServer(network.Server):
 
 def register_into_dispatcher(server, dispatcher: BaseDispatcher):
     handler = KademliaHandler(server)
-    event_header = REQUESTS_HEADERS.KADEMLIA
-    dispatcher.register_handler(event_header, handler)
+    dispatcher.register_handler(REQUESTS_HEADERS.KADEMLIA, handler)
 
 
 def prepare_kad_server(req_transport):
-    kad_server = _get_new_kademlia_server()
+    kad_server = PeerServer(storage=Storage())
+    kad_server.node = get_this_remote_peer()
+    kad_server.start()
     kad_server.transport = KademliaTransport(req_transport)
     return kad_server
-
-
-def _get_new_kademlia_server() -> PeerServer:
-    s = PeerServer(storage=Storage())
-    s.node = get_this_remote_peer()
-    s.start()
-    return s
 
 
 def KademliaHandler(kad_server):
@@ -325,7 +320,7 @@ def KademliaHandler(kad_server):
     return handle
 
 
-# monkey-patching to custom RPCFindResponse
+# monkey-patching
 crawling.RPCFindResponse = RPCFindResponse
 network.Server.protocol_class = KadProtocol
 kademlia.node.Node = RemotePeer

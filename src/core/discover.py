@@ -113,7 +113,6 @@ async def send_discovery_requests(transport, broad_cast_addr, multicast_addr):
         await _try_asking_user(transport, ping_data)
 
     await task
-    # await asyncio.sleep(const.DISCOVER_TIMEOUT)  # wait a bit
 
 
 async def _try_asking_user(transport, discovery_packet):
