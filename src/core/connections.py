@@ -22,6 +22,8 @@ from src.webpage_handlers import pagehandle
 
 _logger = logging.getLogger(__name__)
 
+# :todo: change the way ping connection works
+
 
 async def initiate_connections():
     acceptor = Acceptor()

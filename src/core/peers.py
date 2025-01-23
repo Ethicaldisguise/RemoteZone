@@ -367,6 +367,8 @@ def new_peer(peer):
     pagehandle.dispatch_data(data)
 
 
+# :todo: improve all this peer aliveness mechanisms
+
 async def check_and_remove(peer: RemotePeer):
     req_dispatcher = Dock.dispatchers[DISPATCHS.REQUESTS]
     ping_data = WireData(
@@ -394,5 +396,13 @@ async def check_and_remove(peer: RemotePeer):
 
 
 def remove_peer(peer):
+    """
+
+    Args:
+        peer:
+
+    Returns:
+
+    """
     _logger.warning(f"a request for removal of {peer}")
     asyncio.create_task(check_and_remove(peer))
